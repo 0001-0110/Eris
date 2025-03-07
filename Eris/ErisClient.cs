@@ -14,6 +14,11 @@ public class ErisClient
     private readonly ICommandManager _commandManager;
     private readonly IMessageManager _messageManager;
     private readonly IServiceManager _serviceManager;
+    private Task _serviceTask = Task.CompletedTask;
+
+    private readonly TaskCompletionSource _shutdownSource;
+
+    public DiscordSocketClient Client => _client;
 
     public ErisClient()
     {
@@ -24,8 +29,12 @@ public class ErisClient
             new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
 
         _commandManager = new CommandManager();
+        _client.SlashCommandExecuted += _commandManager.Handle;
         _messageManager = new MessageManager();
+        _client.MessageReceived += _messageManager.Handle;
         _serviceManager = new ServiceManager();
+
+        _shutdownSource = new TaskCompletionSource();
 
         _client.Log += log => { Console.WriteLine(log.Message); return Task.CompletedTask; };
         // TODO Remove later
@@ -42,18 +51,26 @@ public class ErisClient
         await _client.StartAsync();
     }
 
+    private async Task Disconnect()
+    {
+        await _client.SetStatusAsync(UserStatus.Offline);
+        await _client.StopAsync();
+        await _client.LogoutAsync();
+    }
+
     public async Task Run()
     {
         await Connect();
+        //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
+        await _shutdownSource.Task;
+    }
 
-        try
-        {
-            await Task.Delay(-1, _cancellationTokenSource.Token);
-        }
-        catch (TaskCanceledException exception)
-        {
-            // TODO Log
-        }
+    public async Task Stop()
+    {
+        _cancellationTokenSource.Cancel();
+        await _serviceTask;
+        await Disconnect();
+        _shutdownSource.SetResult();
     }
 
     public ErisClient AddCommandHandler(ICommandHandler commandHandler)
