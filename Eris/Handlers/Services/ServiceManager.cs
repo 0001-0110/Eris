@@ -6,4 +6,9 @@ internal class ServiceManager : IServiceManager
     {
         throw new NotImplementedException();
     }
+
+    public Task StartServices(CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -1,6 +1,6 @@
 namespace Eris.Handlers.Services;
 
-public interface IServiceHandler : IExecutableHandler
+public interface IServiceHandler : IHandler
 {
 
 }

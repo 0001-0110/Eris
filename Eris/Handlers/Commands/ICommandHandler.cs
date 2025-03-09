@@ -1,6 +1,6 @@
 namespace Eris.Handlers.Commands;
 
-public interface ICommandHandler : IExecutableHandler
+public interface ICommandHandler : IMessageChannelHandler
 {
 
 }

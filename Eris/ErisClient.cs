@@ -29,20 +29,14 @@ public class ErisClient
             new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
 
         _commandManager = new CommandManager();
-        _client.SlashCommandExecuted += _commandManager.Handle;
+        _client.SlashCommandExecuted += _commandManager.HandleCommand;
         _messageManager = new MessageManager();
-        _client.MessageReceived += _messageManager.Handle;
+        _client.MessageReceived += _messageManager.HandleMessage;
         _serviceManager = new ServiceManager();
 
         _shutdownSource = new TaskCompletionSource();
 
         _client.Log += log => { Console.WriteLine(log.Message); return Task.CompletedTask; };
-        // TODO Remove later
-        _client.Ready += async () =>
-        {
-            await _client.SetStatusAsync(UserStatus.Online);
-            await _client.SetGameAsync("test");
-        };
     }
 
     private async Task Connect()
@@ -58,7 +52,7 @@ public class ErisClient
         await _client.LogoutAsync();
     }
 
-    public async Task Run()
+    public async Task Start()
     {
         await Connect();
         //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
