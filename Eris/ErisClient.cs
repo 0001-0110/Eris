@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Eris.Handlers.Commands;
+using Eris.Handlers.CommandHandlers;
+using Eris.Handlers.Commands.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
 
@@ -67,7 +68,7 @@ public class ErisClient
         _shutdownSource.SetResult();
     }
 
-    public ErisClient AddCommandHandler(ICommandHandler commandHandler)
+    public ErisClient AddCommandHandler(BaseCommandHandler commandHandler)
     {
         _commandManager.AddHandler(commandHandler);
         return this;
