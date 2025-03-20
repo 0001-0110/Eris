@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Eris", "Eris\Eris.csproj", "{31B2FB2E-1B69-45A1-8BB9-2B7FDC282636}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -10,5 +12,11 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{31B2FB2E-1B69-45A1-8BB9-2B7FDC282636}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31B2FB2E-1B69-45A1-8BB9-2B7FDC282636}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31B2FB2E-1B69-45A1-8BB9-2B7FDC282636}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31B2FB2E-1B69-45A1-8BB9-2B7FDC282636}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
