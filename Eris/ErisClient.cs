@@ -62,7 +62,7 @@ public class ErisClient
         await _client.LogoutAsync();
     }
 
-    public async Task Start()
+    public async Task Run()
     {
         await Connect();
         await _shutdownSource.Task;
