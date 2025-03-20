@@ -40,7 +40,7 @@ public class ErisClient
         _shutdownSource = new TaskCompletionSource();
 
         _client.Ready += OnReady;
-        _client.Log += log => { Console.WriteLine(log.Message); return Task.CompletedTask; };
+        _client.Log += log => { Console.WriteLine(log.Message); if (log.Exception is not null) Console.WriteLine(log.Exception); return Task.CompletedTask; };
     }
 
     private async Task Connect()
