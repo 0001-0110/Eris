@@ -1,8 +1,18 @@
-namespace Eris.Handlers.Commands.Request;
+using Discord.WebSocket;
+
+namespace Eris.Handlers.CommandHandlers.Request;
 
 public interface ICommandRequest
 {
-    public string CommandName { get; }
+    string CommandName { get; }
 
-    public ICommandRequest GetSubCommand();
+    SocketUser Sender { get; }
+
+    ISocketMessageChannel Channel { get; }
+
+    Task Respond(string text);
+
+    SocketSlashCommandDataOption? GetOption(string name);
+
+    ICommandRequest GetSubCommand();
 }

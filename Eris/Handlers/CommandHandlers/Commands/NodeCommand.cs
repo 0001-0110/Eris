@@ -1,4 +1,5 @@
-using Eris.Handlers.Commands.Request;
+using Discord;
+using Eris.Handlers.CommandHandlers.Request;
 
 namespace Eris.Handlers.CommandHandlers.Commands;
 
@@ -6,11 +7,18 @@ public abstract class CommandGroup : ICommand
 {
     private readonly IDictionary<string, SubCommandHandler> _handlers;
 
-    public abstract IEnumerable<SubCommandHandler> SubCommandHandlers { get; }
+    protected abstract IEnumerable<SubCommandHandler> SubCommandHandlers { get; }
 
-    public CommandGroup(IEnumerable<SubCommandHandler> subCommandHandlers)
+    public ApplicationCommandOptionType Type => ApplicationCommandOptionType.SubCommandGroup;
+
+    public CommandGroup()
     {
-        throw new NotImplementedException();
+        _handlers = SubCommandHandlers.ToDictionary(handler => handler.Name);
+    }
+
+    public SlashCommandOptionBuilder[] CreateOptions()
+    {
+        return _handlers.Values.Select(handler => handler.CreateCommand()).ToArray();
     }
 
     public Task Execute(ICommandRequest request)

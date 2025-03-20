@@ -1,6 +1,6 @@
 using Discord;
 using Eris.Handlers.CommandHandlers.Commands;
-using Eris.Handlers.Commands.Request;
+using Eris.Handlers.CommandHandlers.Request;
 
 namespace Eris.Handlers.CommandHandlers;
 
@@ -12,7 +12,10 @@ public abstract class CommandHandler : IHandler
 
     public string Description => (Command as FinalCommand)?.Description ?? string.Empty;
 
-    internal protected abstract SlashCommandOptionBuilder[] CreateOptions();
+    protected SlashCommandOptionBuilder[] CreateOptions()
+    {
+        return Command.CreateOptions();
+    }
 
     public Task Execute(ICommandRequest request)
     {

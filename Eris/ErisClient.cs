@@ -1,9 +1,10 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Eris.Handlers.CommandHandlers;
-using Eris.Handlers.Commands.Manager;
+using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
+using InjectoPatronum;
 
 namespace Eris;
 
@@ -29,7 +30,8 @@ public class ErisClient
             // TODO Be more restrictive depending on what is actually used
             new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
 
-        _commandManager = new CommandManager();
+        // TODO Improve dependency injection
+        _commandManager = new CommandManager(new DependencyInjector());
         _client.SlashCommandExecuted += _commandManager.HandleCommand;
         _messageManager = new MessageManager();
         _client.MessageReceived += _messageManager.HandleMessage;
@@ -37,6 +39,7 @@ public class ErisClient
 
         _shutdownSource = new TaskCompletionSource();
 
+        _client.Ready += OnReady;
         _client.Log += log => { Console.WriteLine(log.Message); return Task.CompletedTask; };
     }
 
@@ -44,6 +47,12 @@ public class ErisClient
     {
         await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
         await _client.StartAsync();
+    }
+
+    private async Task OnReady()
+    {
+        await _commandManager.CreateCommands(_client);
+        //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
     }
 
     private async Task Disconnect()
@@ -56,7 +65,6 @@ public class ErisClient
     public async Task Start()
     {
         await Connect();
-        //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
         await _shutdownSource.Task;
     }
 
@@ -68,21 +76,21 @@ public class ErisClient
         _shutdownSource.SetResult();
     }
 
-    public ErisClient AddCommandHandler(BaseCommandHandler commandHandler)
+    public ErisClient AddCommandHandler<TCommandHandler>() where TCommandHandler : BaseCommandHandler
     {
-        _commandManager.AddHandler(commandHandler);
+        _commandManager.AddHandler<TCommandHandler>();
         return this;
     }
 
-    public ErisClient AddMessageHandler(IMessageHandler messageHandler)
+    public ErisClient AddMessageHandler<TMessageHandler>() where TMessageHandler : IMessageHandler
     {
-        _messageManager.AddHandler(messageHandler);
+        _messageManager.AddHandler<TMessageHandler>();
         return this;
     }
 
-    public ErisClient AddService(IServiceHandler service)
+    public ErisClient AddService<TServiceHandler>() where TServiceHandler : IServiceHandler
     {
-        _serviceManager.AddHandler(service);
+        _serviceManager.AddHandler<TServiceHandler>();
         return this;
     }
 }

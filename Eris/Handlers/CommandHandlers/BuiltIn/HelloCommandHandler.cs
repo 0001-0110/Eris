@@ -1,10 +1,9 @@
-using Eris.Handlers.CommandHandlers;
 using Eris.Handlers.CommandHandlers.Commands;
-using Eris.Handlers.Commands.Request;
+using Eris.Handlers.CommandHandlers.Request;
 
-namespace Eris;
+namespace Eris.Handlers.CommandHandlers.BuiltIn;
 
-internal class HelloCommandHandler : GlobalCommandHandler
+public class HelloCommandHandler : GlobalCommandHandler
 {
     private class HelloCommand : FinalCommand
     {
@@ -12,11 +11,11 @@ internal class HelloCommandHandler : GlobalCommandHandler
 
         public override Task Execute(ICommandRequest request)
         {
-            throw new NotImplementedException();
+            return request.Respond("Hello, World!");
         }
     }
 
     protected override ICommand Command => new HelloCommand();
 
-    public override string Name => "Test";
+    public override string Name => "hello";
 }
