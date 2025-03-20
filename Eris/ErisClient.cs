@@ -52,7 +52,7 @@ public class ErisClient
         await _client.LogoutAsync();
     }
 
-    public async Task Start()
+    public async Task Run()
     {
         await Connect();
         //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
