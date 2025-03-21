@@ -2,21 +2,30 @@ using Eris.Handlers.CommandHandlers;
 using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
+using Eris.Logging;
 using InjectoPatronum;
 
 namespace Eris;
 
 public class ErisClientBuilder
 {
+    private readonly LoggerManager _loggerManager;
     private readonly ICommandManager _commandManager;
     private readonly IMessageManager _messageManager;
     private readonly IServiceManager _serviceManager;
 
     public ErisClientBuilder(IDependencyInjector injector)
     {
+        _loggerManager = injector.Instantiate<LoggerManager>();
         _commandManager = injector.Instantiate<CommandManager>();
         _messageManager = injector.Instantiate<MessageManager>();
         _serviceManager = injector.Instantiate<ServiceManager>();
+    }
+
+    public ErisClientBuilder AddLogger(ILogger logger)
+    {
+        _loggerManager.AddLogger(logger);
+        return this;
     }
 
     public ErisClientBuilder AddCommandHandler<TCommandHandler>() where TCommandHandler : BaseCommandHandler
@@ -39,6 +48,6 @@ public class ErisClientBuilder
 
     public ErisClient Build()
     {
-        return new ErisClient(_commandManager, _messageManager, _serviceManager);
+        return new ErisClient(_loggerManager, _commandManager, _messageManager, _serviceManager);
     }
 }
