@@ -1,10 +1,13 @@
-using Discord.WebSocket;
+using Discord;
 
 namespace Eris.Handlers;
 
 public interface IMessageChannelHandler : IHandler
 {
-    bool IsEnabled(ISocketMessageChannel channel);
+    /// <summary>
+    /// Is this handler enabled in direct message channels ?
+    /// </summary>
+    bool IsDMEnabled { get; }
 
-    Task<bool> IsEnabledAsync(ISocketMessageChannel channel);
+    bool IsEnabled(IGuild guild);
 }

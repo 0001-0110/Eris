@@ -1,6 +1,6 @@
 ﻿using Discord;
 using Discord.WebSocket;
-using Eris.Handlers.Commands;
+using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
 
@@ -36,13 +36,20 @@ public class ErisClient
 
         _shutdownSource = new TaskCompletionSource();
 
-        _client.Log += log => { Console.WriteLine(log.Message); return Task.CompletedTask; };
+        _client.Ready += OnReady;
+        _client.Log += log => { Console.WriteLine(log.Message); if (log.Exception is not null) Console.WriteLine(log.Exception); return Task.CompletedTask; };
     }
 
     private async Task Connect()
     {
         await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
         await _client.StartAsync();
+    }
+
+    private async Task OnReady()
+    {
+        await _commandManager.CreateCommands(_client);
+        //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
     }
 
     private async Task Disconnect()
@@ -55,7 +62,6 @@ public class ErisClient
     public async Task Run()
     {
         await Connect();
-        //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
         await _shutdownSource.Task;
     }
 

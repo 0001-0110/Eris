@@ -1,6 +1,8 @@
-using Eris.Handlers.Commands;
+using Eris.Handlers.CommandHandlers;
+using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
+using InjectoPatronum;
 
 namespace Eris;
 
@@ -10,28 +12,28 @@ public class ErisClientBuilder
     private readonly IMessageManager _messageManager;
     private readonly IServiceManager _serviceManager;
 
-    public ErisClientBuilder()
+    public ErisClientBuilder(IDependencyInjector injector)
     {
-        _commandManager = new CommandManager();
-        _messageManager = new MessageManager();
-        _serviceManager = new ServiceManager();
+        _commandManager = injector.Instantiate<CommandManager>();
+        _messageManager = injector.Instantiate<MessageManager>();
+        _serviceManager = injector.Instantiate<ServiceManager>();
     }
 
-    public ErisClientBuilder AddCommandHandler(ICommandHandler commandHandler)
+    public ErisClientBuilder AddCommandHandler<TCommandHandler>() where TCommandHandler : BaseCommandHandler
     {
-        _commandManager.AddHandler(commandHandler);
+        _commandManager.AddHandler<TCommandHandler>();
         return this;
     }
 
-    public ErisClientBuilder AddMessageHandler(IMessageHandler messageHandler)
+    public ErisClientBuilder AddMessageHandler<TMessageHandler>() where TMessageHandler : IMessageHandler
     {
-        _messageManager.AddHandler(messageHandler);
+        _messageManager.AddHandler<TMessageHandler>();
         return this;
     }
 
-    public ErisClientBuilder AddService(IServiceHandler service)
+    public ErisClientBuilder AddService<TServiceHandler>() where TServiceHandler : IServiceHandler
     {
-        _serviceManager.AddHandler(service);
+        _serviceManager.AddHandler<TServiceHandler>();
         return this;
     }
 
