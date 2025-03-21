@@ -23,7 +23,7 @@ public class ErisClient
 
     public DiscordSocketClient Client => _client;
 
-    public ErisClient()
+    internal ErisClient(LoggerManager loggerManager, ICommandManager commandManager, IMessageManager messageManager, IServiceManager serviceManager)
     {
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -31,13 +31,13 @@ public class ErisClient
             // TODO Be more restrictive depending on what is actually used
             new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
 
-        _loggerManager = new LoggerManager();
+        _loggerManager = loggerManager;
         _client.Log += _loggerManager.Log;
-        _commandManager = new CommandManager();
+        _commandManager = commandManager;
         _client.SlashCommandExecuted += _commandManager.HandleCommand;
-        _messageManager = new MessageManager();
+        _messageManager = messageManager;
         _client.MessageReceived += _messageManager.HandleMessage;
-        _serviceManager = new ServiceManager();
+        _serviceManager = serviceManager;
 
         _shutdownSource = new TaskCompletionSource();
 
@@ -69,29 +69,5 @@ public class ErisClient
         await _serviceTask;
         await Disconnect();
         _shutdownSource.SetResult();
-    }
-
-    public ErisClient AddLogger(ILogger logger)
-    {
-        _loggerManager.AddLogger(logger);
-        return this;
-    }
-
-    public ErisClient AddCommandHandler(ICommandHandler commandHandler)
-    {
-        _commandManager.AddHandler(commandHandler);
-        return this;
-    }
-
-    public ErisClient AddMessageHandler(IMessageHandler messageHandler)
-    {
-        _messageManager.AddHandler(messageHandler);
-        return this;
-    }
-
-    public ErisClient AddService(IServiceHandler service)
-    {
-        _serviceManager.AddHandler(service);
-        return this;
     }
 }
