@@ -41,6 +41,7 @@ public class ErisClient
 
         _shutdownSource = new TaskCompletionSource();
 
+        _client.Ready += () => throw new Exception("You ugly");
     }
 
     private async Task Connect()
