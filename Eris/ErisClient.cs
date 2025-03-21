@@ -3,6 +3,7 @@ using Discord.WebSocket;
 using Eris.Handlers.Commands;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
+using Eris.Logging;
 
 namespace Eris;
 
@@ -10,6 +11,8 @@ public class ErisClient
 {
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly DiscordSocketClient _client;
+
+    private readonly LoggerManager _loggerManager;
 
     private readonly ICommandManager _commandManager;
     private readonly IMessageManager _messageManager;
@@ -28,6 +31,8 @@ public class ErisClient
             // TODO Be more restrictive depending on what is actually used
             new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
 
+        _loggerManager = new LoggerManager();
+        _client.Log += _loggerManager.Log;
         _commandManager = new CommandManager();
         _client.SlashCommandExecuted += _commandManager.HandleCommand;
         _messageManager = new MessageManager();
@@ -36,7 +41,6 @@ public class ErisClient
 
         _shutdownSource = new TaskCompletionSource();
 
-        _client.Log += log => { Console.WriteLine(log.Message); return Task.CompletedTask; };
     }
 
     private async Task Connect()
@@ -65,6 +69,12 @@ public class ErisClient
         await _serviceTask;
         await Disconnect();
         _shutdownSource.SetResult();
+    }
+
+    public ErisClient AddLogger(ILogger logger)
+    {
+        _loggerManager.AddLogger(logger);
+        return this;
     }
 
     public ErisClient AddCommandHandler(ICommandHandler commandHandler)
