@@ -2,9 +2,9 @@ using Discord;
 
 namespace Eris.Logging;
 
-public class DsicordLogger : ILogger
+public class DsicordLogger : LoggerBase
 {
-    public Task Log(LogMessage log)
+    public override Task Log(LogMessage log)
     {
         throw new NotImplementedException();
     }

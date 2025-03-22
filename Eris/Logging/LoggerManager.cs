@@ -2,7 +2,7 @@ using Discord;
 
 namespace Eris.Logging;
 
-internal class LoggerManager : ILogger
+internal class LoggerManager : LoggerBase
 {
     private readonly ICollection<ILogger> _loggers;
 
@@ -16,7 +16,7 @@ internal class LoggerManager : ILogger
         _loggers.Add(logger);
     }
 
-    public Task Log(LogMessage log)
+    public override Task Log(LogMessage log)
     {
         return Task.WhenAll(_loggers.Select(logger => logger.Log(log)));
     }

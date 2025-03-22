@@ -17,6 +17,7 @@ public class ErisClientBuilder
     public ErisClientBuilder(IDependencyInjector injector)
     {
         _loggerManager = injector.Instantiate<LoggerManager>();
+        injector.MapSingleton<ILogger>(_loggerManager);
         _commandManager = injector.Instantiate<CommandManager>();
         _messageManager = injector.Instantiate<MessageManager>();
         _serviceManager = injector.Instantiate<ServiceManager>();

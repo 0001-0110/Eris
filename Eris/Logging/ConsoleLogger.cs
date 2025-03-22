@@ -2,7 +2,7 @@ using Discord;
 
 namespace Eris.Logging;
 
-public class ConsoleLogger : ILogger
+public class ConsoleLogger : LoggerBase
 {
     private string FormatLogMessage(LogMessage logMessage)
     {
@@ -26,7 +26,7 @@ public class ConsoleLogger : ILogger
         };
     }
 
-    public Task Log(LogMessage logMessage)
+    public override Task Log(LogMessage logMessage)
     {
         string formattedMessage = FormatLogMessage(logMessage);
 

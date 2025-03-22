@@ -53,7 +53,7 @@ public class ErisClient
     private async Task OnReady()
     {
         await _commandManager.CreateCommands(_client);
-        //_serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
+        _serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
     }
 
     private async Task Disconnect()
