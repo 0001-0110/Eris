@@ -1,6 +1,6 @@
 namespace Eris.Handlers.CommandHandlers;
 
-public abstract class GlobalCommandHandler : BaseCommandHandler
+public abstract class GlobalCommandHandler : RootCommandHandler
 {
 
 }

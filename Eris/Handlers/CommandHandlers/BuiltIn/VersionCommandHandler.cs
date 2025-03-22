@@ -10,6 +10,8 @@ public class VersionCommandHandler : GlobalCommandHandler
     {
         public override string Description => "Show the current version";
 
+        public override IEnumerable<CommandOption> Options => [];
+
         public override Task Execute(ICommandRequest request)
         {
             string version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString() ?? "Version not found";

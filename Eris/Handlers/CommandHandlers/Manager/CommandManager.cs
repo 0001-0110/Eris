@@ -15,7 +15,7 @@ internal class CommandManager : ICommandManager
         _handlers = new Dictionary<string, Type>();
     }
 
-    public void AddHandler<TCommandHandler>() where TCommandHandler : BaseCommandHandler
+    public void AddHandler<TCommandHandler>() where TCommandHandler : RootCommandHandler
     {
         _handlers.Add(_injector.Instantiate<TCommandHandler>().Name, typeof(TCommandHandler));
     }

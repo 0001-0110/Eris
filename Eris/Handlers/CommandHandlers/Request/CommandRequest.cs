@@ -23,7 +23,6 @@ public class CommandRequest : ICommandRequest
         _subCommand = subCommand;
     }
 
-    // TODO Change this to use my option wrapper
     public SocketSlashCommandDataOption? GetOption(string name)
     {
         IReadOnlyCollection<SocketSlashCommandDataOption> options = _subCommand?.Options ?? _command.Data.Options;

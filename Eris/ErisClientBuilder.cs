@@ -29,7 +29,7 @@ public class ErisClientBuilder
         return this;
     }
 
-    public ErisClientBuilder AddCommandHandler<TCommandHandler>() where TCommandHandler : BaseCommandHandler
+    public ErisClientBuilder AddCommandHandler<TCommandHandler>() where TCommandHandler : RootCommandHandler
     {
         _commandManager.AddHandler<TCommandHandler>();
         return this;

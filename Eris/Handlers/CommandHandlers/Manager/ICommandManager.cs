@@ -2,7 +2,7 @@ using Discord.WebSocket;
 
 namespace Eris.Handlers.CommandHandlers.Manager;
 
-internal interface ICommandManager : IHandlerManager<BaseCommandHandler>
+internal interface ICommandManager : IHandlerManager<RootCommandHandler>
 {
     Task CreateCommands(DiscordSocketClient client);
 
