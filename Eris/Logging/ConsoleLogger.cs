@@ -4,7 +4,7 @@ namespace Eris.Logging;
 
 public class ConsoleLogger : LoggerBase
 {
-    private string FormatLogMessage(LogMessage logMessage)
+    private static string FormatLogMessage(LogMessage logMessage)
     {
         string exceptionMessage = logMessage.Exception is null ? string.Empty :
             $"{Environment.NewLine}{logMessage.Exception}";
@@ -12,7 +12,7 @@ public class ConsoleLogger : LoggerBase
         return $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{logMessage.Severity}] [{logMessage.Source}]: {logMessage.Message}{exceptionMessage}";
     }
 
-    private ConsoleColor GetConsoleColor(LogSeverity severity)
+    private static ConsoleColor GetConsoleColor(LogSeverity severity)
     {
         return severity switch
         {
