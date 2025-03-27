@@ -1,25 +1,29 @@
 using Discord.WebSocket;
+using InjectoPatronum;
 
 namespace Eris.Handlers.Messages;
 
 internal class MessageManager : IMessageManager
 {
-    private readonly ICollection<IMessageHandler> _messageHandlers;
+    private readonly IDependencyInjector _injector;
 
-    public MessageManager()
+    private readonly ICollection<Type> _messageHandlers;
+
+    public MessageManager(IDependencyInjector injector)
     {
-        _messageHandlers = new List<IMessageHandler>();
+        _injector = injector;
+        _messageHandlers = [];
     }
 
     public void AddHandler<TMessageHandler>() where TMessageHandler : IMessageHandler
     {
-        //_messageHandlers.Add<TMessageHandler>();
-        throw new NotImplementedException();
+        _messageHandlers.Add(typeof(TMessageHandler));
     }
 
     public async Task HandleMessage(SocketMessage message)
     {
-        foreach (IMessageHandler messageHandler in _messageHandlers)
+        foreach (IMessageHandler messageHandler in _messageHandlers
+            .Select(type => (IMessageHandler)_injector.Instantiate(type)))
         {
             if (message.Channel.ChannelType switch
                 {
@@ -28,7 +32,9 @@ internal class MessageManager : IMessageManager
                     _ => throw new Exception("Something went really wrong"),
                 })
             {
-                await messageHandler.HandleMessage(message);
+                // If the handler returns false, this message has been handled and we stop here
+                if (!await messageHandler.HandleMessage(message))
+                    return;
             }
         }
     }
