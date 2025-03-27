@@ -4,5 +4,5 @@ namespace Eris.Handlers.Messages;
 
 public interface IMessageHandler : IMessageChannelHandler
 {
-    Task HandleMessage(SocketMessage message);
+    Task<bool> HandleMessage(SocketMessage message);
 }
