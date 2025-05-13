@@ -1,10 +1,12 @@
-using Eris.Handlers.CommandHandlers.Commands;
+using Discord.Interactions;
 
 namespace Eris.Handlers.CommandHandlers.BuiltIn;
 
-public class HelpCommandHandler : GlobalCommandHandler
+public class HelpCommandHandler : InteractionModuleBase<SocketInteractionContext>
 {
-    public override string Name => "help";
-
-    protected override ICommand Command => throw new NotImplementedException();
+    [SlashCommand("help", "")]
+    public Task Help()
+    {
+        return RespondAsync("Not implemented yet");
+    }
 }

@@ -1,54 +1,30 @@
+using System.Reflection;
+using Discord.Interactions;
 using Discord.WebSocket;
-using Eris.Handlers.CommandHandlers.Request;
-using InjectoPatronum;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Eris.Handlers.CommandHandlers.Manager;
 
 internal class CommandManager : ICommandManager
 {
-    private readonly IDependencyInjector _injector;
-    private readonly IDictionary<string, Type> _handlers;
+    private readonly InteractionService _interactionService;
+    private readonly IServiceProvider _services;
 
-    public CommandManager(IDependencyInjector injector)
+    public CommandManager(InteractionService interactionService)
     {
-        _injector = injector;
-        _handlers = new Dictionary<string, Type>();
+        _interactionService = interactionService;
+        _services = new ServiceCollection().BuildServiceProvider(); //services;
     }
 
-    public void AddHandler<TCommandHandler>() where TCommandHandler : RootCommandHandler
+    public async Task InitCommands(DiscordSocketClient client)
     {
-        _handlers.Add(_injector.Instantiate<TCommandHandler>().Name, typeof(TCommandHandler));
-    }
+        // TODO How to allow for customization ?
+        await _interactionService.AddModulesAsync(Assembly.GetExecutingAssembly(), _services);
 
-    public async Task CreateCommands(DiscordSocketClient client)
-    {
-        await client.BulkOverwriteGlobalApplicationCommandsAsync(_handlers.Values
-            .Where(handlerType => handlerType.IsAssignableTo(typeof(GlobalCommandHandler)))
-            .Select(type => (GlobalCommandHandler)_injector.Instantiate(type))
-            .Select(handler => handler.CreateCommand().Build()).ToArray());
-
-        foreach (SocketGuild guild in client.Guilds)
+        client.InteractionCreated += async interaction =>
         {
-            await guild.BulkOverwriteApplicationCommandAsync(_handlers.Values
-                .Where(handlerType => handlerType.IsAssignableTo(typeof(GuildCommandHandler)))
-                .Select(type => (GuildCommandHandler)_injector.Instantiate(type))
-                .Where(handler => handler.IsEnabled(guild))
-                .Select(handler => handler.CreateCommand().Build()).ToArray());
-        }
-    }
-
-    public Task HandleCommand(SocketSlashCommand command)
-    {
-        // TODO Temp debug, switch to proper logging with DI
-        try
-        {
-            return ((CommandHandler)_injector.Instantiate(_handlers[command.CommandName]))
-                .Execute(new CommandRequest(command));
-        }
-        catch (Exception exception)
-        {
-            Console.WriteLine(exception);
-            throw;
-        }
+            SocketInteractionContext context = new SocketInteractionContext(client, interaction);
+            await _interactionService.ExecuteCommandAsync(context, _services);
+        };
     }
 }

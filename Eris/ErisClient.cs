@@ -1,9 +1,11 @@
 ﻿using Discord;
+using Discord.Interactions;
 using Discord.WebSocket;
 using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
 using Eris.Logging;
+using InjectoPatronum;
 
 namespace Eris;
 
@@ -23,7 +25,7 @@ public class ErisClient
 
     public DiscordSocketClient Client => _client;
 
-    internal ErisClient(LoggerManager loggerManager, ICommandManager commandManager, IMessageManager messageManager, IServiceManager serviceManager)
+    public ErisClient(IDependencyInjector injector)
     {
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -31,13 +33,13 @@ public class ErisClient
             // TODO Be more restrictive depending on what is actually used
             new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
 
-        _loggerManager = loggerManager;
-        _client.Log += _loggerManager.Log;
-        _commandManager = commandManager;
-        _client.SlashCommandExecuted += _commandManager.HandleCommand;
-        _messageManager = messageManager;
+        // _loggerManager = loggerManager;
+        _client.Log += async log => Console.WriteLine(log.ToString()); //_loggerManager.Log;
+        _commandManager = new CommandManager(new InteractionService(_client));
+        // _client.SlashCommandExecuted += _commandManager.HandleCommand;
+        _messageManager = new MessageManager(injector);
         _client.MessageReceived += _messageManager.HandleMessage;
-        _serviceManager = serviceManager;
+        _serviceManager = new ServiceManager(injector, null);
 
         _shutdownSource = new TaskCompletionSource();
 
@@ -52,8 +54,9 @@ public class ErisClient
 
     private async Task OnReady()
     {
-        await _commandManager.CreateCommands(_client);
-        _serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
+        // await _commandManager.CreateCommands(_client);
+        await _commandManager.InitCommands(_client);
+        // _serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
     }
 
     private async Task Disconnect()
