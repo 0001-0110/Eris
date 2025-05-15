@@ -1,6 +1,5 @@
 namespace Eris.Handlers;
 
-internal interface IHandlerManager<THandler> where THandler : IHandler
+internal interface IHandlerManager<THandler>
 {
-    void AddHandler<T>() where T : THandler;
 }

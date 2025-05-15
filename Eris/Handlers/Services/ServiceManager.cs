@@ -1,23 +1,20 @@
 using Discord;
 using Eris.Logging;
-using InjectoPatronum;
 
 namespace Eris.Handlers.Services;
 
 internal class ServiceManager : IServiceManager
 {
-    private readonly IDependencyInjector _injector;
     private readonly ILogger _logger;
-    private readonly IDictionary<Type, Task> _services;
+    private readonly IDictionary<IServiceHandler, Task> _serviceHandlers;
 
-    public ServiceManager(IDependencyInjector injector, ILogger logger)
+    public ServiceManager(ILogger logger, IEnumerable<IServiceHandler> serviceHandlers)
     {
-        _injector = injector;
         _logger = logger;
-        _services = new Dictionary<Type, Task>();
+        _serviceHandlers = serviceHandlers.ToDictionary(handler => handler, _ => Task.CompletedTask);
     }
 
-    private async Task RunService(Type serviceHandler, CancellationToken cancellationToken)
+    private async Task RunService(IServiceHandler serviceHandler, CancellationToken cancellationToken)
     {
         int failCount = 0;
         while (!cancellationToken.IsCancellationRequested)
@@ -25,15 +22,13 @@ internal class ServiceManager : IServiceManager
             DateTime startTime = DateTime.Now;
             try
             {
-                IServiceHandler handler = (IServiceHandler)_injector.Instantiate(serviceHandler);
-                await _logger.Log(LogSeverity.Verbose, nameof(ServiceManager),
-                    $"Service {serviceHandler.Name} is starting");
-                await handler.Run(cancellationToken);
+                await _logger.Log(LogSeverity.Verbose, nameof(ServiceManager), $"Service {serviceHandler} is starting");
+                await serviceHandler.Run(cancellationToken);
             }
             catch (Exception exception)
             {
                 await _logger.Log(LogSeverity.Error, nameof(ServiceManager),
-                    $"Service {serviceHandler.Name} exited with an error:", exception);
+                    $"Service {serviceHandler} exited with an error:", exception);
             }
             TimeSpan uptime = DateTime.Now - startTime;
 
@@ -44,23 +39,16 @@ internal class ServiceManager : IServiceManager
 
             TimeSpan delay = TimeSpan.FromSeconds(Math.Pow(2, failCount));
             await _logger.Log(LogSeverity.Warning, nameof(ServiceManager),
-                $"Service {serviceHandler.Name} exited, restarting in {delay}");
+                $"Service {serviceHandler} exited, restarting in {delay}");
             await Task.Delay(delay, cancellationToken);
         }
     }
 
-    public void AddHandler<TServiceHandler>() where TServiceHandler : IServiceHandler
-    {
-        _services.Add(typeof(TServiceHandler), Task.CompletedTask);
-    }
-
     public Task StartServices(CancellationToken cancellationToken)
     {
-        foreach (Type service in _services.Keys)
-        {
-            _services[service] = RunService(service, cancellationToken);
-        }
+        foreach (IServiceHandler serviceHandler in _serviceHandlers.Keys)
+            _serviceHandlers[serviceHandler] = RunService(serviceHandler, cancellationToken);
 
-        return Task.WhenAll(_services.Values);
+        return Task.WhenAll(_serviceHandlers.Values);
     }
 }

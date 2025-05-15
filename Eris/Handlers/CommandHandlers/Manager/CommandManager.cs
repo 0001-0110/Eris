@@ -1,4 +1,3 @@
-using System.Reflection;
 using Discord.Interactions;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,16 +9,19 @@ internal class CommandManager : ICommandManager
     private readonly InteractionService _interactionService;
     private readonly IServiceProvider _services;
 
-    public CommandManager(InteractionService interactionService)
+    public CommandManager(InteractionService interactionService, IServiceProvider services)
     {
         _interactionService = interactionService;
-        _services = new ServiceCollection().BuildServiceProvider(); //services;
+        _services = services;
     }
 
     public async Task InitCommands(DiscordSocketClient client)
     {
-        // TODO How to allow for customization ?
-        await _interactionService.AddModulesAsync(Assembly.GetExecutingAssembly(), _services);
+        foreach (var commandHandler in _services.GetServices<CommandHandler>())
+            await _interactionService.AddModuleAsync(commandHandler.GetType(), _services);
+
+        await _interactionService.RegisterCommandsToGuildAsync(854747950973452288, deleteMissing: true);
+        // await _interactionService.RegisterCommandsGloballyAsync(deleteMissing: true);
 
         client.InteractionCreated += async interaction =>
         {

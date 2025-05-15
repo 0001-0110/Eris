@@ -3,7 +3,7 @@ using Discord.Interactions;
 
 namespace Eris.Handlers.CommandHandlers.BuiltIn;
 
-public class VersionCommandHandler : InteractionModuleBase<SocketInteractionContext>
+public class VersionCommandHandler : CommandHandler
 {
     [SlashCommand("version", "Get the current version")]
     public Task Execute()
