@@ -1,6 +1,4 @@
 ﻿using Discord;
-using Discord.Interactions;
-using Discord.Rest;
 using Discord.WebSocket;
 using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
@@ -26,25 +24,28 @@ public class ErisClient
 
     public DiscordSocketClient Client => _client;
 
-    internal ErisClient(IServiceCollection services)
+    // DI doesn't work with internal ctors, but the other ctor can't be made public since it uses internal classes
+    public ErisClient(IServiceProvider services) : this(
+        services.GetRequiredService<DiscordSocketClient>(),
+        services.GetRequiredService<ILogger>(),
+        services.GetRequiredService<ICommandManager>(),
+        services.GetRequiredService<IMessageManager>(),
+        services.GetRequiredService<IServiceManager>()
+    )
+    { }
+
+    internal ErisClient(DiscordSocketClient client, ILogger logger, ICommandManager commandManager,
+        IMessageManager messageManager, IServiceManager serviceManager)
     {
         _cancellationTokenSource = new CancellationTokenSource();
 
-        _client = new DiscordSocketClient(
-            // TODO Be more restrictive depending on what is actually used
-            new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
-
-        IServiceProvider provider = services
-            .AddSingleton<IRestClientProvider>(_client)
-            .AddSingleton<InteractionService>()
-            .BuildServiceProvider();
-
-        _logger= provider.GetRequiredService<ILogger>();
+        _client = client;
+        _logger = logger;
         _client.Log += _logger.Log;
-        _commandManager = ActivatorUtilities.CreateInstance<CommandManager>(provider);
-        _messageManager = ActivatorUtilities.CreateInstance<MessageManager>(provider);
+        _commandManager = commandManager;
+        _messageManager = messageManager;
         _client.MessageReceived += _messageManager.HandleMessage;
-        _serviceManager = ActivatorUtilities.CreateInstance<ServiceManager>(provider);
+        _serviceManager = serviceManager;
 
         _shutdownSource = new TaskCompletionSource();
 

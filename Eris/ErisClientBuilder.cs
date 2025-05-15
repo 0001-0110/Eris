@@ -1,4 +1,9 @@
+using Discord;
+using Discord.Interactions;
+using Discord.Rest;
+using Discord.WebSocket;
 using Eris.Handlers.CommandHandlers;
+using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
 using Eris.Logging;
@@ -41,6 +46,19 @@ public class ErisClientBuilder
 
     public ErisClient Build()
     {
-        return new ErisClient(_services);
+        DiscordSocketClient client = new DiscordSocketClient(
+            // TODO Be more restrictive depending on what is actually used
+            new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
+
+        IServiceProvider serviceProvider = _services
+            .AddSingleton<IRestClientProvider>(client)
+            .AddSingleton<DiscordSocketClient>(client)
+            .AddSingleton<InteractionService>()
+            .AddSingleton<ICommandManager, CommandManager>()
+            .AddSingleton<IMessageManager, MessageManager>()
+            .AddSingleton<IServiceManager, ServiceManager>()
+            .BuildServiceProvider();
+
+        return ActivatorUtilities.CreateInstance<ErisClient>(serviceProvider);
     }
 }
