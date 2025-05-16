@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Eris.Handlers.CommandHandlers.Manager;
 
+/// <inheritdoc cref="ICommandManager"/>
 internal class CommandManager : ICommandManager
 {
     private readonly InteractionService _interactionService;
@@ -15,6 +16,7 @@ internal class CommandManager : ICommandManager
         _services = services;
     }
 
+    /// <inheritdoc/>
     public async Task InitCommands(DiscordSocketClient client)
     {
         foreach (var commandHandler in _services.GetServices<CommandHandler>())

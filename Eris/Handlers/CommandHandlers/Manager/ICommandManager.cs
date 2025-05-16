@@ -1,10 +1,15 @@
-using System.Reflection;
-using Discord.Interactions;
 using Discord.WebSocket;
 
 namespace Eris.Handlers.CommandHandlers.Manager;
 
-internal interface ICommandManager : IHandlerManager<InteractionModuleBase<SocketInteractionContext>>
+/// <summary>
+/// Manages all command handlers.
+/// </summary>
+internal interface ICommandManager
 {
+    /// <summary>
+    /// Initializes and registers all slash commands using the provided Discord client.
+    /// This should be called once the client is ready.
+    /// </summary>
     Task InitCommands(DiscordSocketClient client);
 }

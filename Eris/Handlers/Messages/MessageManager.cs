@@ -2,6 +2,7 @@ using Discord.WebSocket;
 
 namespace Eris.Handlers.Messages;
 
+/// <inheritdoc cref="IMessageManager"/>
 internal class MessageManager : IMessageManager
 {
     private readonly IEnumerable<IMessageHandler> _messageHandlers;
@@ -11,7 +12,8 @@ internal class MessageManager : IMessageManager
         _messageHandlers = messageHandlers;
     }
 
-    public async Task HandleMessage(SocketMessage message)
+    /// <inheritdoc/>
+    public async Task Handle(SocketMessage message)
     {
         foreach (IMessageHandler messageHandler in _messageHandlers)
         {
