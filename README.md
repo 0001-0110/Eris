@@ -23,8 +23,25 @@ dotnet add package Eris
 
 ---
 
-## 🚀 Getting Started
+## Configuration
+### Setting up your Discord Token
 
+Eris uses the Options pattern to manage configuration, including the Discord bot token.
+
+You need to provide your Discord token via environment variables or configuration files. Eris expects the token to be available under the configuration path:
+
+```json
+"Eris": {
+  "DiscordToken": "your_token_here"
+}
+```
+
+Or as an environment variable:
+```sh
+Eris__DiscordToken=your_token_here
+```
+
+### Basic usage
 ```csharp
 using Eris;
 using Eris.Logging;
@@ -33,7 +50,14 @@ using Eris.Handlers.CommandHandlers.BuiltIn;
 
 public static async Task Main()
 {
+    var configuration = new ConfigurationBuilder()
+        // Choose either one of these two lines depending on where your config is
+        .AddEnvironmentVariables()
+        .AddJsonFile("appsettings.json")
+        .Build();
+
     var client = new ErisClientBuilder()
+        .WithConfiguration(configuration.GetSection("eris"))
         .AddLogger<ConsoleLogger>()
         .AddMessageHandler<IgnoreBotsMessageHandler>()
         .AddMessageHandler<EchoMessageHandler>()
@@ -43,12 +67,6 @@ public static async Task Main()
 
     await client.Run();
 }
-```
-
-Make sure to define the `DISCORD_TOKEN` environment variable with your bot token:
-
-```bash
-export DISCORD_TOKEN=your_token_here
 ```
 
 ---
@@ -84,7 +102,7 @@ public class EchoHandler : IMessageHandler
 Long-running background services implement `IServiceHandler`. Eris will restart services on failure with exponential backoff.
 
 ```csharp
-public class ReminderService : IServiceHandler
+public class SampleService : IServiceHandler
 {
     public async Task Run(CancellationToken token)
     {
@@ -105,7 +123,7 @@ Eris defines a simple `ILogger` interface. A basic `ConsoleLogger` is included.
 
 You can create your own logger by implementing the `ILogger` interface or extending `LoggerBase`:
 ```csharp
-public class ConsoleLogger : LoggerBase
+public class CustomLogger : LoggerBase
 {
     public override Task Log(LogMessage logMessage)
     {

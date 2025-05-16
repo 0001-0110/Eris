@@ -1,10 +1,12 @@
 ﻿using Discord;
 using Discord.WebSocket;
+using Eris.Configuration;
 using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
 using Eris.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Eris;
 
@@ -15,9 +17,10 @@ namespace Eris;
 public class ErisClient
 {
     private readonly CancellationTokenSource _cancellationTokenSource;
+    private readonly DiscordOptions _options;
     private readonly DiscordSocketClient _client;
 
-    private readonly ILogger _logger;
+    private readonly ILogger? _logger;
 
     private readonly ICommandManager _commandManager;
     private readonly IMessageManager _messageManager;
@@ -38,22 +41,26 @@ public class ErisClient
     /// <param name="services">A configured service provider with all required dependencies.</param>
     [Obsolete("Use the ErisClientBuilder instead", true)]
     public ErisClient(IServiceProvider services) : this(
-        services.GetRequiredService<DiscordSocketClient>(),
-        services.GetRequiredService<ILogger>(),
-        services.GetRequiredService<ICommandManager>(),
-        services.GetRequiredService<IMessageManager>(),
-        services.GetRequiredService<IServiceManager>()
+        services.GetService<IOptions<DiscordOptions>>() ?? throw new Exception("Missing the configuration"),
+        services.GetService<DiscordSocketClient>() ?? throw new Exception("Missing the discord client, are you using the builder ?"),
+        services.GetService<ILogger>(),
+        services.GetService<ICommandManager>() ?? throw new Exception("Missing an internal manager, are you using the builder ?"),
+        services.GetService<IMessageManager>() ?? throw new Exception("Missing an internal manager, are you using the builder ?"),
+        services.GetService<IServiceManager>() ?? throw new Exception("Missing an internal manager, are you using the builder ?")
     )
     { }
 
-    internal ErisClient(DiscordSocketClient client, ILogger logger, ICommandManager commandManager,
-        IMessageManager messageManager, IServiceManager serviceManager)
+    internal ErisClient(IOptions<DiscordOptions> options, DiscordSocketClient client, ILogger? logger,
+        ICommandManager commandManager, IMessageManager messageManager, IServiceManager serviceManager)
     {
         _cancellationTokenSource = new CancellationTokenSource();
 
+        _options = options.Value;
         _client = client;
         _logger = logger;
-        _client.Log += _logger.Log;
+        if (_logger is not null)
+            _client.Log += _logger.Log;
+
         _commandManager = commandManager;
         _messageManager = messageManager;
         _client.MessageReceived += _messageManager.Handle;
@@ -65,12 +72,11 @@ public class ErisClient
     }
 
     /// <summary>
-    /// Connects the client to Discord using the token from the DISCORD_TOKEN environment variable.
+    /// Connects the client to Discord using the token from the configuration.
     /// </summary>
     private async Task Connect()
     {
-        // TODO Searching in the var env is not the best way. Using IOptions would be better
-        await _client.LoginAsync(TokenType.Bot, Environment.GetEnvironmentVariable("DISCORD_TOKEN"));
+        await _client.LoginAsync(TokenType.Bot, _options.DiscordToken);
         await _client.StartAsync();
     }
 

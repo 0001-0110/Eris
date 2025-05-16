@@ -2,11 +2,13 @@ using Discord;
 using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
+using Eris.Configuration;
 using Eris.Handlers.CommandHandlers;
 using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
 using Eris.Handlers.Services;
 using Eris.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Eris;
@@ -22,6 +24,12 @@ public class ErisClientBuilder
     public ErisClientBuilder()
     {
         _services = new ServiceCollection();
+    }
+
+    public ErisClientBuilder WithConfiguration(IConfiguration configuration)
+    {
+        _services.Configure<DiscordOptions>(configuration);
+        return this;
     }
 
     /// <summary>
