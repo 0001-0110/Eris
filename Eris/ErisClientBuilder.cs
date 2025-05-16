@@ -26,9 +26,40 @@ public class ErisClientBuilder
         _services = new ServiceCollection();
     }
 
+    /// <summary>
+    /// Configures Eris with the provided <see cref="IConfiguration"/> section.
+    /// This is used to bind settings like the Discord bot token via the Options pattern.
+    /// </summary>
+    /// <param name="configuration">The configuration section that maps to <see cref="DiscordOptions"/>.</param>
+    /// <returns>The current <see cref="ErisClientBuilder"/> instance for chaining.</returns>
     public ErisClientBuilder WithConfiguration(IConfiguration configuration)
     {
         _services.Configure<DiscordOptions>(configuration);
+        return this;
+    }
+
+    /// <summary>
+    /// Registers a service that can be used internally by other handlers or managers.
+    /// Use this for additional helper services needed by your bot.
+    /// </summary>
+    /// <typeparam name="TService">The service type to register.</typeparam>
+    /// <returns>The current <see cref="ErisClientBuilder"/> instance for chaining.</returns>
+    public ErisClientBuilder AddService<TService>() where TService : class
+    {
+        _services.AddTransient<TService>();
+        return this;
+    }
+
+    /// <summary>
+    /// Registers a service with an interface-to-implementation mapping.
+    /// This is useful for injecting abstractions into handlers and managers.
+    /// </summary>
+    /// <typeparam name="TService">The interface or base class type.</typeparam>
+    /// <typeparam name="TImplementation">The concrete implementation type.</typeparam>
+    /// <returns>The current <see cref="ErisClientBuilder"/> instance for chaining.</returns>
+    public ErisClientBuilder AddService<TService, TImplementation>() where TService : class where TImplementation : class, TService
+    {
+        _services.AddTransient<TService, TImplementation>();
         return this;
     }
 
