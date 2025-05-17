@@ -4,12 +4,12 @@
 
 ## ✨ Features
 
-* 🧩 **Modular architecture** with support for message handlers, service handlers, and command handlers.
+* 🧩 **Modular architecture** with support for command handlers, message handlers, and background task handlers.
 * 🔗 **Chain-of-responsibility pattern** for message handling.
 * 🧠 **Dependency injection** via `Microsoft.Extensions.DependencyInjection`.
 * 🛠️ **Builder pattern** for simple and clear configuration.
 * 📋 Slash command support via `CommandHandler`s.
-* 📡 Automatic service recovery and logging.
+* 📡 Automatic task recovery and logging.
 
 ---
 
@@ -99,10 +99,10 @@ public class EchoHandler : IMessageHandler
 
 ### 🔄 Service Handlers
 
-Long-running background services implement `IServiceHandler`. Eris will restart services on failure with exponential backoff.
+Long-running background tasks implement `IBackgroundTaskHandler`. Eris will restart background tasks on failure with exponential backoff.
 
 ```csharp
-public class SampleService : IServiceHandler
+public class SampleService : IBackgroundTaskHandler
 {
     public async Task Run(CancellationToken token)
     {

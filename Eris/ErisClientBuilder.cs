@@ -3,10 +3,10 @@ using Discord.Interactions;
 using Discord.Rest;
 using Discord.WebSocket;
 using Eris.Configuration;
+using Eris.Handlers.BackgroundTasks;
 using Eris.Handlers.CommandHandlers;
 using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
-using Eris.Handlers.Services;
 using Eris.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -99,14 +99,14 @@ public class ErisClientBuilder
     }
 
     /// <summary>
-    /// Registers a service handler that will run a background task.
-    /// Services should only stop when the cancellation token is cancelled.
+    /// Registers a background task handler that will run continuously.
+    /// Tasks should only stop when the cancellation token is cancelled.
     /// </summary>
-    /// <typeparam name="TServiceHandler">A class implementing <see cref="IServiceHandler"/>.</typeparam>
+    /// <typeparam name="TBackgroundTaskHandler">A class implementing <see cref="IBackgroundTaskHandler"/>.</typeparam>
     /// <returns>The current builder instance for chaining.</returns>
-    public ErisClientBuilder AddServiceHandler<TServiceHandler>() where TServiceHandler : class, IServiceHandler
+    public ErisClientBuilder AddBackgroundTaskHandler<TBackgroundTaskHandler>() where TBackgroundTaskHandler : class, IBackgroundTaskHandler
     {
-        _services.AddSingleton<IServiceHandler, TServiceHandler>();
+        _services.AddSingleton<IBackgroundTaskHandler, TBackgroundTaskHandler>();
         return this;
     }
 
@@ -122,12 +122,14 @@ public class ErisClientBuilder
             new DiscordSocketConfig() { GatewayIntents = GatewayIntents.All });
 
         IServiceProvider serviceProvider = _services
+            // IRestClientProvider is a required dependency of InteractionService
             .AddSingleton<IRestClientProvider>(client)
+            // This makes the client available to all handlers that need it
             .AddSingleton<DiscordSocketClient>(client)
             .AddSingleton<InteractionService>()
             .AddSingleton<ICommandManager, CommandManager>()
             .AddSingleton<IMessageManager, MessageManager>()
-            .AddSingleton<IServiceManager, ServiceManager>()
+            .AddSingleton<IBackgroundTaskManager, BackgroundTaskManager>()
             .BuildServiceProvider();
 
         return ActivatorUtilities.CreateInstance<ErisClient>(serviceProvider);

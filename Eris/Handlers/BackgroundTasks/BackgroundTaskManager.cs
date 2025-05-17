@@ -1,27 +1,27 @@
 using Discord;
 using Eris.Logging;
 
-namespace Eris.Handlers.Services;
+namespace Eris.Handlers.BackgroundTasks;
 
 /// <summary>
-/// Responsible for managing the lifecycle and supervision of background services.
-/// Ensures services are restarted with exponential backoff on failure.
+/// Responsible for managing the lifecycle and supervision of background tasks.
+/// Ensures tasks are restarted with exponential backoff on failure.
 /// </summary>
-internal class ServiceManager : IServiceManager
+internal class BackgroundTaskManager : IBackgroundTaskManager
 {
     private readonly ILogger _logger;
-    private readonly IDictionary<IServiceHandler, Task> _serviceHandlers;
+    private readonly IDictionary<IBackgroundTaskHandler, Task> _serviceHandlers;
 
-    public ServiceManager(ILogger logger, IEnumerable<IServiceHandler> serviceHandlers)
+    public BackgroundTaskManager(ILogger logger, IEnumerable<IBackgroundTaskHandler> serviceHandlers)
     {
         _logger = logger;
         _serviceHandlers = serviceHandlers.ToDictionary(handler => handler, _ => Task.CompletedTask);
     }
 
     /// <summary>
-    /// Continuously runs the provided service. If it exits unexpectedly, it is restarted with exponential backoff.
+    /// Continuously runs the provided task. If it exits unexpectedly, it is restarted with exponential backoff.
     /// </summary>
-    private async Task RunService(IServiceHandler serviceHandler, CancellationToken cancellationToken)
+    private async Task RunBackgroundTask(IBackgroundTaskHandler serviceHandler, CancellationToken cancellationToken)
     {
         int failCount = 0;
 
@@ -31,12 +31,12 @@ internal class ServiceManager : IServiceManager
 
             try
             {
-                await _logger.Log(LogSeverity.Verbose, nameof(ServiceManager), $"Service {serviceHandler} is starting");
+                await _logger.Log(LogSeverity.Verbose, nameof(BackgroundTaskManager), $"Service {serviceHandler} is starting");
                 await serviceHandler.Run(cancellationToken);
             }
             catch (Exception exception)
             {
-                await _logger.Log(LogSeverity.Error, nameof(ServiceManager),
+                await _logger.Log(LogSeverity.Error, nameof(BackgroundTaskManager),
                     $"Service {serviceHandler} exited with an error:", exception);
             }
 
@@ -49,7 +49,7 @@ internal class ServiceManager : IServiceManager
 
             // Calculate exponential backoff delay
             TimeSpan delay = TimeSpan.FromSeconds(Math.Pow(2, failCount));
-            await _logger.Log(LogSeverity.Warning, nameof(ServiceManager),
+            await _logger.Log(LogSeverity.Warning, nameof(BackgroundTaskManager),
                 $"Service {serviceHandler} exited, restarting in {delay}");
 
             await Task.Delay(delay, cancellationToken);
@@ -57,10 +57,10 @@ internal class ServiceManager : IServiceManager
     }
 
     /// <inheritdoc/>
-    public Task StartServices(CancellationToken cancellationToken)
+    public Task Start(CancellationToken cancellationToken)
     {
-        foreach (IServiceHandler serviceHandler in _serviceHandlers.Keys)
-            _serviceHandlers[serviceHandler] = RunService(serviceHandler, cancellationToken);
+        foreach (IBackgroundTaskHandler serviceHandler in _serviceHandlers.Keys)
+            _serviceHandlers[serviceHandler] = RunBackgroundTask(serviceHandler, cancellationToken);
 
         return Task.WhenAll(_serviceHandlers.Values);
     }

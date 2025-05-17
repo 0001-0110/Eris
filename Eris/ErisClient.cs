@@ -1,9 +1,9 @@
 ﻿using Discord;
 using Discord.WebSocket;
 using Eris.Configuration;
+using Eris.Handlers.BackgroundTasks;
 using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.Messages;
-using Eris.Handlers.Services;
 using Eris.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -24,7 +24,7 @@ public class ErisClient
 
     private readonly ICommandManager _commandManager;
     private readonly IMessageManager _messageManager;
-    private readonly IServiceManager _serviceManager;
+    private readonly IBackgroundTaskManager _backgroundTaskManager;
     private Task _serviceTask = Task.CompletedTask;
 
     private readonly TaskCompletionSource _shutdownSource;
@@ -46,12 +46,12 @@ public class ErisClient
         services.GetService<ILogger>(),
         services.GetService<ICommandManager>() ?? throw new Exception("Missing an internal manager, are you using the builder ?"),
         services.GetService<IMessageManager>() ?? throw new Exception("Missing an internal manager, are you using the builder ?"),
-        services.GetService<IServiceManager>() ?? throw new Exception("Missing an internal manager, are you using the builder ?")
+        services.GetService<IBackgroundTaskManager>() ?? throw new Exception("Missing an internal manager, are you using the builder ?")
     )
     { }
 
     internal ErisClient(IOptions<DiscordOptions> options, DiscordSocketClient client, ILogger? logger,
-        ICommandManager commandManager, IMessageManager messageManager, IServiceManager serviceManager)
+        ICommandManager commandManager, IMessageManager messageManager, IBackgroundTaskManager backgroundTaskManager)
     {
         _cancellationTokenSource = new CancellationTokenSource();
 
@@ -64,7 +64,7 @@ public class ErisClient
         _commandManager = commandManager;
         _messageManager = messageManager;
         _client.MessageReceived += _messageManager.Handle;
-        _serviceManager = serviceManager;
+        _backgroundTaskManager = backgroundTaskManager;
 
         _shutdownSource = new TaskCompletionSource();
 
@@ -87,7 +87,7 @@ public class ErisClient
     private async Task OnReady()
     {
         await _commandManager.InitCommands(_client);
-        _serviceTask = _serviceManager.StartServices(_cancellationTokenSource.Token);
+        _serviceTask = _backgroundTaskManager.Start(_cancellationTokenSource.Token);
     }
 
     /// <summary>
