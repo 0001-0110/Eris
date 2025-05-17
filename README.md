@@ -143,4 +143,15 @@ Always create your bot instance using `ErisClientBuilder` to avoid breaking init
 
 ## 📜 License
 
-TODO
+This project is licensed under the **Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)** license.
+
+See the full license text in the [LICENSE](./LICENSE) file.
+
+---
+
+## 🚧 Planned Features
+
+* **Global and Guild Command Registration**
+
+  * Enable or disable guild-specific commands per guild via configuration.
+  * Dynamically refresh command registration at runtime to reflect configuration changes.
