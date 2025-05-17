@@ -1,6 +1,6 @@
 using Discord.WebSocket;
 
-namespace Eris.Handlers.Messages.BuiltIn;
+namespace Eris.Handlers.MessageHandlers.BuiltIn;
 
 /// <summary>
 /// A message handler that echoes back any received message content to the same channel.

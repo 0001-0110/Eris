@@ -1,6 +1,6 @@
 using Discord.WebSocket;
 
-namespace Eris.Handlers.Messages.BuiltIn;
+namespace Eris.Handlers.MessageHandlers.BuiltIn;
 
 /// <summary>
 /// A message handler that filters out messages sent by bots.

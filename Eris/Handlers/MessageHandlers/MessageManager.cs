@@ -1,6 +1,6 @@
 using Discord.WebSocket;
 
-namespace Eris.Handlers.Messages;
+namespace Eris.Handlers.MessageHandlers;
 
 /// <inheritdoc cref="IMessageManager"/>
 internal class MessageManager : IMessageManager

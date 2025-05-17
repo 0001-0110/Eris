@@ -1,6 +1,6 @@
 using Discord.WebSocket;
 
-namespace Eris.Handlers.Messages;
+namespace Eris.Handlers.MessageHandlers;
 
 /// <summary>
 /// Represents a message handler in a chain-of-responsibility pattern.

@@ -1,6 +1,6 @@
 using Discord.WebSocket;
 
-namespace Eris.Handlers.Messages;
+namespace Eris.Handlers.MessageHandlers;
 
 /// <summary>
 /// Manages message handlers and routes incoming messages through the processing chain.
