@@ -46,7 +46,7 @@ public class ErisClientBuilder
     /// <returns>The current <see cref="ErisClientBuilder"/> instance for chaining.</returns>
     public ErisClientBuilder AddService<TService>() where TService : class
     {
-        _services.AddTransient<TService>();
+        _services.AddSingleton<TService>();
         return this;
     }
 
@@ -59,7 +59,7 @@ public class ErisClientBuilder
     /// <returns>The current <see cref="ErisClientBuilder"/> instance for chaining.</returns>
     public ErisClientBuilder AddService<TService, TImplementation>() where TService : class where TImplementation : class, TService
     {
-        _services.AddTransient<TService, TImplementation>();
+        _services.AddSingleton<TService, TImplementation>();
         return this;
     }
 
