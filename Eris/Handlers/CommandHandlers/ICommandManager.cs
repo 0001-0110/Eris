@@ -1,6 +1,6 @@
 using Discord.WebSocket;
 
-namespace Eris.Handlers.CommandHandlers.Manager;
+namespace Eris.Handlers.CommandHandlers;
 
 /// <summary>
 /// Manages all command handlers.

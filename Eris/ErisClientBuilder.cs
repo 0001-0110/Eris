@@ -5,7 +5,6 @@ using Discord.WebSocket;
 using Eris.Configuration;
 using Eris.Handlers.BackgroundTasks;
 using Eris.Handlers.CommandHandlers;
-using Eris.Handlers.CommandHandlers.Manager;
 using Eris.Handlers.MessageHandlers;
 using Eris.Logging;
 using Microsoft.Extensions.Configuration;
