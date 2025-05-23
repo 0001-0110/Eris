@@ -7,11 +7,13 @@ namespace Eris.Handlers.CommandHandlers;
 /// <inheritdoc cref="ICommandManager"/>
 internal class CommandManager : ICommandManager
 {
+    private readonly DiscordSocketClient _client;
     private readonly InteractionService _interactionService;
     private readonly IServiceProvider _services;
 
-    public CommandManager(InteractionService interactionService, IServiceProvider services)
+    public CommandManager(DiscordSocketClient client, InteractionService interactionService, IServiceProvider services)
     {
+        _client = client;
         _interactionService = interactionService;
         _services = services;
     }
@@ -19,12 +21,15 @@ internal class CommandManager : ICommandManager
     /// <inheritdoc/>
     public async Task InitCommands(DiscordSocketClient client)
     {
+        // Delete all global commands
+        await _interactionService.RegisterCommandsGloballyAsync(deleteMissing: true);
+
         foreach (CommandHandler commandHandler in _services.GetServices<CommandHandler>())
             await _interactionService.AddModuleAsync(commandHandler.GetType(), _services);
 
         // TODO Handle guild and global commands
-        // await _interactionService.RegisterCommandsToGuildAsync(854747950973452288, deleteMissing: true);
-        await _interactionService.RegisterCommandsGloballyAsync(deleteMissing: true);
+        foreach (SocketGuild? guild in _client.Guilds)
+            await _interactionService.RegisterCommandsToGuildAsync(guild.Id, deleteMissing: true);
 
         client.InteractionCreated += async interaction =>
         {
